@@ -1,4 +1,4 @@
-﻿// Copyright 2016 SerilogTimings Contributors
+﻿// Copyright 2016 ILoggerTimings Contributors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,11 +13,11 @@
 // limitations under the License.
 
 using System;
-using Serilog;
-using Serilog.Events;
-using SerilogTimings.Configuration;
+using System.Collections.Generic;
+using Microsoft.Extensions.Logging;
+using ILoggerTimings.Configuration;
 
-namespace SerilogTimings.Extensions
+namespace ILoggerTimings.Extensions
 {
     /// <summary>
     /// Extends <see cref="ILogger"/> with timed operations.
@@ -32,10 +32,26 @@ namespace SerilogTimings.Extensions
         /// <param name="args">Arguments to the log message. These will be stored and captured only when the
         /// operation completes, so do not pass arguments that are mutated during the operation.</param>
         /// <returns>An <see cref="Operation"/> object.</returns>
-        public static IDisposable TimeOperation(this ILogger logger, string messageTemplate, params object[] args)
+        public static IDisposable TimeOperation(this ILogger logger,string messageTemplate, IDictionary<string, object> args)
         {
-            return new Operation(logger, messageTemplate, args, CompletionBehaviour.Complete, LogEventLevel.Information, LogEventLevel.Warning);
+            return new Operation(logger, messageTemplate, args, CompletionBehaviour.Complete, LogLevel.Information, LogLevel.Warning);
         }
+
+
+        ///// <summary>
+        ///// Begin a new timed operation. The return value must be disposed to complete the operation.
+        ///// </summary>
+        ///// <param name="logger">The logger through which the timing will be recorded.</param>
+        ///// <param name="startingMessage">A starting log message.</param>
+        ///// <param name="messageTemplate">A log message describing the operation, in message template format.</param>
+        ///// <param name="args">Arguments to the log message. These will be stored and captured only when the
+        ///// operation completes, so do not pass arguments that are mutated during the operation.</param>
+        ///// <returns>An <see cref="Operation"/> object.</returns>
+        //public static IDisposable TimeOperation(this ILogger logger,string startingMessage, string messageTemplate, params object[] args)
+        //{
+        //    logger.Log(LogLevel.Information,startingMessage);
+        //    return new Operation(logger, messageTemplate, args, CompletionBehaviour.Complete, LogLevel.Information, LogLevel.Warning);
+        //}
 
         /// <summary>
         /// Begin a new timed operation. The return value must be completed using <see cref="Operation.Complete()"/>,
@@ -46,9 +62,9 @@ namespace SerilogTimings.Extensions
         /// <param name="args">Arguments to the log message. These will be stored and captured only when the
         /// operation completes, so do not pass arguments that are mutated during the operation.</param>
         /// <returns>An <see cref="Operation"/> object.</returns>
-        public static Operation BeginOperation(this ILogger logger, string messageTemplate, params object[] args)
+        public static Operation BeginOperation(this ILogger logger, string messageTemplate, IDictionary<string, object>  args)
         {
-            return new Operation(logger, messageTemplate, args, CompletionBehaviour.Abandon, LogEventLevel.Information, LogEventLevel.Warning);
+            return new Operation(logger, messageTemplate, args, CompletionBehaviour.Abandon, LogLevel.Information, LogLevel.Warning);
         }
 
         /// <summary>
@@ -61,7 +77,7 @@ namespace SerilogTimings.Extensions
         /// <returns>An object from which timings with the configured levels can be made.</returns>
         /// <remarks>If neither <paramref name="completion"/> nor <paramref name="abandonment"/> is enabled
         /// on the logger at the time of the call, a no-op result is returned.</remarks>
-        public static LevelledOperation OperationAt(this ILogger logger, LogEventLevel completion, LogEventLevel? abandonment = null)
+        public static LevelledOperation OperationAt(this ILogger logger, LogLevel completion, LogLevel? abandonment = null)
         {
             if (logger == null) throw new ArgumentNullException(nameof(logger));
 
@@ -69,7 +85,7 @@ namespace SerilogTimings.Extensions
             if (!logger.IsEnabled(completion) &&
                 (appliedAbandonment == completion || !logger.IsEnabled(appliedAbandonment)))
             {
-                return LevelledOperation.None;
+                return LevelledOperation.GetNone(logger);
             }
 
             return new LevelledOperation(logger, completion, appliedAbandonment);

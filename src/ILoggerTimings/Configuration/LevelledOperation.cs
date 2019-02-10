@@ -1,4 +1,4 @@
-// Copyright 2016 SerilogTimings Contributors
+// Copyright 2016 ILoggerTimings Contributors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,10 +13,11 @@
 // limitations under the License.
 
 using System;
-using Serilog;
-using Serilog.Events;
+using System.Collections.Generic;
+using Microsoft.Extensions.Logging;
 
-namespace SerilogTimings.Configuration
+
+namespace ILoggerTimings.Configuration
 {
     /// <summary>
     /// Launches <see cref="Operation"/>s with non-default completion and abandonment levels.
@@ -27,10 +28,10 @@ namespace SerilogTimings.Configuration
         readonly Operation _cachedResult;
 
         readonly ILogger _logger;
-        readonly LogEventLevel _completion;
-        readonly LogEventLevel _abandonment;
+        readonly LogLevel _completion;
+        readonly LogLevel _abandonment;
 
-        internal LevelledOperation(ILogger logger, LogEventLevel completion, LogEventLevel abandonment)
+        internal LevelledOperation(ILogger logger, LogLevel completion, LogLevel abandonment)
         {
             if (logger == null) throw new ArgumentNullException(nameof(logger));
             _logger = logger;
@@ -44,13 +45,20 @@ namespace SerilogTimings.Configuration
             _cachedResult = cachedResult;
         }
 
-        internal static LevelledOperation None { get; } = new LevelledOperation(
-            new Operation(
-                new LoggerConfiguration().CreateLogger(),
-                "", new object[0],
-                CompletionBehaviour.Silent,
-                LogEventLevel.Fatal,
-                LogEventLevel.Fatal));
+        private static LevelledOperation None(ILogger _logger)
+        {
+            return new LevelledOperation(
+                new Operation(_logger,
+                    "", new Dictionary<string, object>(), 
+                    CompletionBehaviour.Silent,
+                    LogLevel.Critical,
+                    LogLevel.Critical));
+        } 
+
+        internal static LevelledOperation GetNone(ILogger _logger)
+        {
+            return None(_logger);
+        }
 
         /// <summary>
         /// Begin a new timed operation. The return value must be completed using <see cref="Operation.Complete()"/>,
@@ -60,7 +68,7 @@ namespace SerilogTimings.Configuration
         /// <param name="args">Arguments to the log message. These will be stored and captured only when the
         /// operation completes, so do not pass arguments that are mutated during the operation.</param>
         /// <returns>An <see cref="Operation"/> object.</returns>
-        public Operation Begin(string messageTemplate, params object[] args)
+        public Operation Begin(string messageTemplate, IDictionary<string, object> args)
         {
             return _cachedResult ?? new Operation(_logger, messageTemplate, args, CompletionBehaviour.Abandon, _completion, _abandonment);
         }
@@ -72,7 +80,7 @@ namespace SerilogTimings.Configuration
         /// <param name="args">Arguments to the log message. These will be stored and captured only when the
         /// operation completes, so do not pass arguments that are mutated during the operation.</param>
         /// <returns>An <see cref="Operation"/> object.</returns>
-        public IDisposable Time(string messageTemplate, params object[] args)
+        public IDisposable Time(string messageTemplate, IDictionary<string, object> args)
         {
             return _cachedResult ?? new Operation(_logger, messageTemplate, args, CompletionBehaviour.Complete, _completion, _abandonment);
         }
