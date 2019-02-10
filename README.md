@@ -1,6 +1,6 @@
 # ILogger Timings [![NuGet Release](https://img.shields.io/nuget/v/ILoggerTimings.svg)](https://nuget.org/packages/ILoggerTimings)
 
-#Forked from SerilogTimings
+### Forked from SerilogTimings
 
 .Net Core ILogger used instead of Serilog Logger. And parameters changed in order to allow the use of a IDictionary<string,object> to record properties. At least for now, Operation methods were disabled.
 
