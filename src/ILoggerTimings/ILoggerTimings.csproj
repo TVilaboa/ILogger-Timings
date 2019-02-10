@@ -5,6 +5,11 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Authors>TVilaboa, nblumhardt</Authors>
     <Description>TVilaboa forked from nblumhardt/serilog-timings</Description>
+    <PackageProjectUrl>https://github.com/TVilaboa/ILogger-Timings</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/TVilaboa/ILogger-Timings</RepositoryUrl>
+    <RepositoryType>Git</RepositoryType>
+    <PackageLicenseUrl>https://github.com/TVilaboa/ILogger-Timings/blob/dev/LICENSE</PackageLicenseUrl>
+    <Version>1.0.1</Version>
   </PropertyGroup>
 
   <ItemGroup>

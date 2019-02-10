@@ -66,7 +66,7 @@ namespace ILoggerTimings
         CompletionBehaviour _completionBehaviour;
         readonly LogLevel _completionLevel;
         readonly LogLevel _abandonmentLevel;
-        private IDictionary<string,object> _context;
+        //private IDictionary<string,object> _context;
 
         internal Operation(ILogger target, string messageTemplate, IDictionary<string,object> args, CompletionBehaviour completionBehaviour, LogLevel completionLevel, LogLevel abandonmentLevel)
         {
